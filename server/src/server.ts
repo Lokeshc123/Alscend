@@ -5,6 +5,7 @@ import { connectDb } from "./config/database";
 
 const PORT = process.env.PORT;
 connectDb();
+
 if (!PORT) {
   console.log("The server must be started with an environment variable PORT");
   process.exit(0);
