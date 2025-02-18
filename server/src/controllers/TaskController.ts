@@ -4,6 +4,7 @@ import { IUser } from "../models/User";
 interface AuthRequest extends Request {
   user?: IUser; // Extend Request to include user
 }
+
 export const createTask = async (
   req: Request,
   res: Response,

@@ -1,7 +1,8 @@
-import app from "./app";
 import dotenv from "dotenv";
 dotenv.config();
+import app from "./app";
 import { connectDb } from "./config/database";
+import model from "./config/gemini";
 
 const PORT = process.env.PORT;
 connectDb();
