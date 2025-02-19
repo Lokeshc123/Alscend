@@ -1,10 +1,8 @@
 import { NextFunction, Request, Response } from "express";
 import Task from "../models/Task";
 import { IUser } from "../models/User";
-interface AuthRequest extends Request {
-  user?: IUser; // Extend Request to include user
-}
-
+import { AuthRequest } from "../utils/customInterface";
+import Journal from "../models/Journal";
 export const createTask = async (
   req: Request,
   res: Response,
@@ -130,6 +128,39 @@ export const deleteAllTasksForUser = async (
     const userId = req.user._id;
     await Task.deleteMany({ user: userId });
     res.status(200).json({ status: "success", message: "All tasks deleted" });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const createJournalEntryForTask = async (
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const userId = req.user?._id;
+    const { taskId, title, content } = req.body;
+    const jounral = new Journal({
+      user: userId,
+      title,
+      content,
+      isTaskJournal: true,
+    });
+    await jounral.save();
+    const task = await Task.findOneAndUpdate(
+      { _id: taskId, user: userId },
+      { $push: { journalEntries: jounral._id } },
+      { new: true }
+    );
+    if (!task) {
+      throw { status: 404, message: "Task not found" };
+    }
+    res.status(201).json({
+      status: "success",
+      message: "Journal entry created successfully and linked to task",
+      data: jounral,
+    });
   } catch (error) {
     next(error);
   }

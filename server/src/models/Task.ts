@@ -9,6 +9,7 @@ export interface ITask extends Document {
   goal?: number;
   progress?: number;
   progressRecords: mongoose.Types.ObjectId[];
+  journalEntries: mongoose.Types.ObjectId[];
   createdAt: Date;
   updatedAt: Date;
 }
@@ -29,6 +30,7 @@ const TaskSchema: Schema = new Schema(
       type: Number,
       default: 0,
     },
+    journalEntries: [{ type: Schema.Types.ObjectId, ref: "Journal" }],
     progressRecords: [{ type: Schema.Types.ObjectId, ref: "ProgressRecord" }],
   },
   {

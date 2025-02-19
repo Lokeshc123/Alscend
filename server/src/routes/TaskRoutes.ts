@@ -1,5 +1,6 @@
 import express from "express";
 import {
+  createJournalEntryForTask,
   createTask,
   deleteAllTasksForUser,
   deleteTask,
@@ -29,4 +30,9 @@ router.delete(
   protect as express.RequestHandler,
   deleteAllTasksForUser
 ); // Delete all tasks
+router.post(
+  "/add-journal-entry",
+  protect as express.RequestHandler,
+  createJournalEntryForTask
+); // Create a new journal entry
 export default router;
