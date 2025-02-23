@@ -1,14 +1,12 @@
-import Task, { ITask } from "../models/Task"; // Adjust path
-import TaskProgress, { ITaskProgress } from "../models/TaskProgress"; // Adjust path
+import Task, { ITask } from "../models/Task";
+import TaskProgress, { ITaskProgress } from "../models/TaskProgress";
 import { aiResponse } from "../utils/aiResponse";
 import { Response, NextFunction } from "express";
-import { AuthRequest } from "../utils/customInterface";
-
-interface Recommendation {
-  taskId: string;
-  title: string;
-  suggestion: string | null;
-}
+import {
+  AuthRequest,
+  Recommendation,
+  RecommendedTask,
+} from "../utils/customInterface";
 
 export const generateTaskRecommendations = async (
   req: AuthRequest,
@@ -138,6 +136,136 @@ export const generateTaskRecommendations = async (
     res.status(200).json({
       status: "success",
       message: "Recommendations generated successfully",
+      data: recommendations,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const recommendNewTasks = async (
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const userId = req.user?._id;
+    if (!userId) throw { status: 401, message: "Unauthorized" };
+
+    // Fetch existing tasks for the user
+    const tasks = await Task.find({ user: userId }).select("category");
+
+    // List of all possible categories
+    const categories = [
+      "Productivity",
+      "Work",
+      "Hobby",
+      "Health & Fitness",
+      "Personal Development",
+      "Finance",
+      "Social & Relationships",
+      "Self-care",
+      "Household & Chores",
+      "Entertainment",
+    ];
+
+    // Filter out categories the user already has tasks in
+    const filteredCategories = categories.filter(
+      (c) => !tasks.some((t) => t.category === c)
+    );
+
+    // If no new categories are available, return a message
+    if (filteredCategories.length === 0) {
+      res.status(200).json({
+        status: "success",
+        message: "All categories are already covered by existing tasks.",
+        data: [],
+      });
+      return;
+    }
+
+    // Construct AI prompt
+    const prompt = `
+  You are an AI assistant for a self-improvement app. Based on the available categories below, recommend 3 new tasks for the user to try.  
+  These tasks should help the user explore new areas of self-improvement.  
+
+  **Available Categories:**
+  ${filteredCategories.join(", ")}
+
+  **Instructions:**
+  1. Suggest exactly 3 unique tasks, each from a different category in the list.
+  2. For each task, provide:
+     - "title": string (short, descriptive name)
+     - "description": string (optional, brief explanation)
+     - "type": "one-time" or "continuous"
+     - "goal": number (optional, only for "continuous" tasks, e.g., words to write, minutes to spend)
+     - "progress": number (optional, only for "continuous" tasks, default to 0 if provided)
+     - "category": string (one of the available categories)
+     - "reason": string (why this task is recommended)
+  3. Ensure the tasks are practical, engaging, and suited to the category.
+  4. Return a JSON array of 3 objects with the above fields.
+
+  **Examples:**
+  - Category: Productivity
+    Output: {"title": "Organize Desk", "description": "Spend time decluttering your workspace.", "type": "one-time", "category": "Productivity", "reason": "A tidy desk boosts focus and efficiency."}
+  - Category: Health & Fitness
+    Output: {"title": "Run 5km", "type": "continuous", "goal": 5, "progress": 0, "category": "Health & Fitness", "reason": "Running improves stamina and overall fitness."}
+  - Category: Self-care
+    Output: {"title": "Meditate for 10 minutes", "description": "Practice mindfulness daily.", "type": "continuous", "goal": 10, "progress": 0, "category": "Self-care", "reason": "Meditation reduces stress and enhances mental clarity."}
+
+  Return ONLY the JSON array. NO extra text.
+`;
+
+    // Get AI response
+    const aiResult = await aiResponse(prompt);
+    const jsonMatch = aiResult.match(/\[[\s\S]*\]/);
+    if (!jsonMatch)
+      throw { status: 500, message: "AI returned invalid format" };
+
+    let recommendations: RecommendedTask[];
+    try {
+      recommendations = JSON.parse(jsonMatch[0]);
+    } catch {
+      throw { status: 500, message: "AI response parsing failed" };
+    }
+
+    // Validate response
+    if (!Array.isArray(recommendations) || recommendations.length !== 3) {
+      throw { status: 500, message: "AI did not return exactly 3 tasks" };
+    }
+
+    // Ensure each task has required fields and correct structure
+    recommendations.forEach((task) => {
+      if (!task.title || !["one-time", "continuous"].includes(task.type)) {
+        throw { status: 500, message: "AI returned invalid task structure" };
+      }
+      if (
+        task.type === "continuous" &&
+        (task.goal === undefined || task.goal <= 0)
+      ) {
+        throw {
+          status: 500,
+          message: "Continuous tasks must have a valid goal",
+        };
+      }
+      if (
+        task.type === "one-time" &&
+        (task.goal !== undefined || task.progress !== undefined)
+      ) {
+        throw {
+          status: 500,
+          message: "One-time tasks should not have goal or progress",
+        };
+      }
+      // Default progress to 0 for continuous tasks if not provided
+      if (task.type === "continuous" && task.progress === undefined) {
+        task.progress = 0;
+      }
+    });
+
+    res.status(200).json({
+      status: "success",
+      message: "New task recommendations generated successfully",
       data: recommendations,
     });
   } catch (error) {
