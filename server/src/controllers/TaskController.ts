@@ -3,6 +3,7 @@ import Task from "../models/Task";
 import { IUser } from "../models/User";
 import { AuthRequest } from "../utils/customInterface";
 import Journal from "../models/Journal";
+import { aiResponse } from "../utils/aiResponse";
 export const createTask = async (
   req: Request,
   res: Response,
@@ -18,8 +19,60 @@ export const createTask = async (
     if (type === "continuous" && !goal) {
       throw { status: 400, message: "Goal is required for continuous tasks" };
     }
+    const categories = [
+      "Productivity",
+      "Work",
+      "Hobby",
+      "Health & Fitness",
+      "Personal Development",
+      "Finance",
+      "Social & Relationships",
+      "Self-care",
+      "Household & Chores",
+      "Entertainment",
+    ];
+    const prompt = `Given the following task details:
+    - Title: ${title}
+    - Description: ${description}
+    - Type: ${type}
+    
+    Choose the most appropriate category from this predefined list:
+    ${categories.join(", ")}
 
-    const task = new Task({ user, title, description, type, goal });
+    Also, suggest a color in HEX format that represents this category.
+
+    Return a JSON object in this format:
+    {
+      "category": "chosen_category",
+      "color": "color_code"
+    }`;
+
+    const response = await aiResponse(prompt);
+    const jsonMatch = response.match(/\{[\s\S]*\}/);
+    const jsonString = jsonMatch ? jsonMatch[0] : null;
+
+    let parsedReport;
+    if (jsonString) {
+      try {
+        parsedReport = JSON.parse(jsonString);
+      } catch (error) {
+        throw { status: 500, message: "AI response format error" };
+      }
+    } else {
+      throw { status: 500, message: "AI did not return a valid JSON object" };
+    }
+
+    const task = new Task({
+      user,
+      title,
+      description,
+      type,
+      goal,
+      category: parsedReport.category,
+      color: parsedReport.color,
+      originalGoal: goal,
+      currentGoal: goal,
+    });
     await task.save();
 
     res.status(201).json({
