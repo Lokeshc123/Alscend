@@ -8,10 +8,19 @@ import {
   Platform,
 } from "react-native";
 import React, { useState } from "react";
-import { Snackbar } from "react-native-paper"; // Import Snackbar
-import { login } from "../../services/auth";
 
+import { login } from "../../services/auth";
+import { useNavigation } from "@react-navigation/native";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { RootStackParamList } from "../../navigation/StackNavigator";
+import SnackBar from "../../components/SnackBar";
+type LoginScreenNavigationProp = NativeStackNavigationProp<
+  RootStackParamList,
+  "Login"
+>;
 const Login = () => {
+  const navigation = useNavigation<LoginScreenNavigationProp>();
+
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState({ username: "", password: "" });
@@ -38,7 +47,7 @@ const Login = () => {
 
     try {
       const response = await login(username, password);
-      console.log(response);
+      navigation.replace("BottomTab");
     } catch (err: any) {
       setSnackbarMessage(err.message || "Invalid credentials");
       setSnackbarVisible(true);
@@ -95,20 +104,15 @@ const Login = () => {
           <Text style={styles.forgotPassword}>Forgot Password?</Text>
         </TouchableOpacity>
 
-        {/* Snackbar */}
-        <Snackbar
-          visible={snackbarVisible}
-          onDismiss={() => setSnackbarVisible(false)}
-          duration={3000}
-          action={{
-            label: "OK",
-            onPress: () => setSnackbarVisible(false),
-          }}
-          style={styles.snackbar}
-          theme={{ colors: { surface: "#333" } }} // Dark background
-        >
-          {snackbarMessage}
-        </Snackbar>
+        <TouchableOpacity onPress={() => navigation.replace("Register")}>
+          <Text style={styles.forgotPassword}>Create Account instead</Text>
+        </TouchableOpacity>
+
+        <SnackBar
+          snackbarVisible={snackbarVisible}
+          setSnackbarVisible={setSnackbarVisible}
+          snackbarMessage={snackbarMessage}
+        />
       </View>
     </KeyboardAvoidingView>
   );
@@ -119,7 +123,6 @@ export default Login;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f5f7fa",
   },
   innerContainer: {
     flex: 1,
