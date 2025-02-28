@@ -7,13 +7,14 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from "react-native";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
-import { login } from "../../services/auth";
+import { getUser, login } from "../../services/auth";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../../navigation/StackNavigator";
 import SnackBar from "../../components/SnackBar";
+import { getToken } from "../../services/secureStorage";
 type LoginScreenNavigationProp = NativeStackNavigationProp<
   RootStackParamList,
   "Login"
@@ -27,6 +28,25 @@ const Login = () => {
   const [snackbarVisible, setSnackbarVisible] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
 
+  useEffect(() => {
+    handleAutoLogin();
+  }, []);
+
+  const handleAutoLogin = async () => {
+    try {
+      const token = await getToken();
+
+      if (token) {
+        const user = await getUser(token);
+        if (user) {
+          console.log(user);
+          navigation.replace("BottomTab");
+        }
+      }
+    } catch (err: any) {
+      console.log(err.message);
+    }
+  };
   const handleLogin = async () => {
     let hasError = false;
 

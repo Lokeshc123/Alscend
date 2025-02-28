@@ -2,6 +2,7 @@ import User from "../models/User";
 import { Request, Response, NextFunction } from "express";
 import generateToken from "../utils/generateToken";
 import bcrypt from "bcryptjs";
+import { AuthRequest } from "../utils/customInterface";
 export const register = async (
   req: Request,
   res: Response,
@@ -49,6 +50,22 @@ export const login = async (
     }
     const token = generateToken(isExistingUser._id as string);
     res.status(200).json({ success: true, user: isExistingUser, token: token });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getUser = async (
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const user = await User.findById(req.user?._id).select("-password");
+    if (!user) {
+      throw { status: 404, message: "User not found" };
+    }
+    res.status(200).json({ success: true, user });
   } catch (error) {
     next(error);
   }

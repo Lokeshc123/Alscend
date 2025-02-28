@@ -30,10 +30,17 @@ export const login = async (email: string, password: string) => {
   }
 };
 
-
-export const registerUser = async (name : string , email : string , password : string) => {
+export const registerUser = async (
+  name: string,
+  email: string,
+  password: string
+) => {
   try {
-    const response = await api.post("/users/register", { name, email, password });
+    const response = await api.post("/users/register", {
+      name,
+      email,
+      password,
+    });
 
     const token = response.data.token;
 
@@ -42,8 +49,7 @@ export const registerUser = async (name : string , email : string , password : s
       await saveToken(token);
     }
     return response.data;
-  }
-  catch (error: any) {
+  } catch (error: any) {
     let errorMessage = "An unexpected error occurred";
 
     if (error.response) {
@@ -59,4 +65,30 @@ export const registerUser = async (name : string , email : string , password : s
 
     throw new Error(errorMessage);
   }
-}
+};
+
+export const getUser = async (token: string) => {
+  try {
+    const response = await api.get("/users/me", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data.user;
+  } catch (error: any) {
+    let errorMessage = "An unexpected error occurred";
+
+    if (error.response) {
+      // Backend responded with an error (e.g., 400, 401)
+      errorMessage = error.response.data.message || "Login failed";
+    } else if (error.request) {
+      // Request was made but no response received (e.g., server down)
+      errorMessage = "Server not responding. Please try again later.";
+    } else {
+      // Something else went wrong
+      errorMessage = error.message;
+    }
+
+    throw new Error(errorMessage);
+  }
+};
