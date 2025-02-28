@@ -4,6 +4,7 @@ import {
   createTask,
   deleteAllTasksForUser,
   deleteTask,
+  getAllCategories,
   getDetailsOfTask,
   getUserTasks,
   updateTask,
@@ -35,4 +36,9 @@ router.post(
   protect as express.RequestHandler,
   createJournalEntryForTask
 ); // Create a new journal entry
+router.get(
+  "/get-categories",
+
+  getAllCategories
+); // Get all categories
 export default router;

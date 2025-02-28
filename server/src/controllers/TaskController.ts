@@ -219,3 +219,27 @@ export const createJournalEntryForTask = async (
     next(error);
   }
 };
+
+export const getAllCategories = async (
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const categories = [
+      { name: "Personal Development", emoji: "🚀" }, // Growth & ambition
+      { name: "Productivity", emoji: "📝" }, // Notepad for planning & tasks
+      { name: "Work", emoji: "💼" }, // Briefcase for work-related tasks
+      { name: "Hobby", emoji: "🎨" }, // Palette for creative hobbies
+      { name: "Health & Fitness", emoji: "🏋️" }, // Weightlifting for workouts
+      { name: "Finance", emoji: "💰" }, // Money bag for financial management
+      { name: "Social & Relationships", emoji: "👥" }, // People for connections
+      { name: "Self-care", emoji: "🌿" }, // Leaf for relaxation & wellness
+      { name: "Household & Chores", emoji: "🏠" }, // House for home tasks
+      { name: "Entertainment", emoji: "🎮" }, // Game controller for fun & leisure
+    ];
+    res.status(200).json({ status: "success", data: categories });
+  } catch (error) {
+    next(error);
+  }
+};
