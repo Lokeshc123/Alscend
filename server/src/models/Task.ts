@@ -14,6 +14,7 @@ export interface ITask extends Document {
   progress?: number;
   originalGoal?: number;
   currentGoal?: number;
+  emoji?: string;
   streak: number;
   progressRecords: mongoose.Types.ObjectId[];
   journalEntries: mongoose.Types.ObjectId[];
@@ -43,7 +44,7 @@ const TaskSchema: Schema = new Schema(
       type: Number,
       default: 0,
     },
-
+    emoji: { type: String },
     goal: { type: Number },
     progress: {
       type: Number,

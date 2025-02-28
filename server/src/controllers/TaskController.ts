@@ -20,16 +20,16 @@ export const createTask = async (
       throw { status: 400, message: "Goal is required for continuous tasks" };
     }
     const categories = [
-      "Productivity",
-      "Work",
-      "Hobby",
-      "Health & Fitness",
-      "Personal Development",
-      "Finance",
-      "Social & Relationships",
-      "Self-care",
-      "Household & Chores",
-      "Entertainment",
+      { name: "Personal Development", emoji: "🚀" }, // Growth & ambition
+      { name: "Productivity", emoji: "📝" }, // Notepad for planning & tasks
+      { name: "Work", emoji: "💼" }, // Briefcase for work-related tasks
+      { name: "Hobby", emoji: "🎨" }, // Palette for creative hobbies
+      { name: "Health & Fitness", emoji: "🏋️" }, // Weightlifting for workouts
+      { name: "Finance", emoji: "💰" }, // Money bag for financial management
+      { name: "Social & Relationships", emoji: "👥" }, // People for connections
+      { name: "Self-care", emoji: "🌿" }, // Leaf for relaxation & wellness
+      { name: "Household & Chores", emoji: "🏠" }, // House for home tasks
+      { name: "Entertainment", emoji: "🎮" }, // Game controller for fun & leisure
     ];
     const prompt = `Given the following task details:
     - Title: ${title}
@@ -37,13 +37,13 @@ export const createTask = async (
     - Type: ${type}
     
     Choose the most appropriate category from this predefined list:
-    ${categories.join(", ")}
-
+${categories.map((cat) => cat.name).join(", ")}
     Also, suggest a color in HEX format that represents this category.
 
     Return a JSON object in this format:
     {
       "category": "chosen_category",
+      "emoji": "Professional looking but modern vibes emoji_representation",
       "color": "color_code"
     }`;
 
@@ -70,6 +70,7 @@ export const createTask = async (
       goal,
       category: parsedReport.category,
       color: parsedReport.color,
+      emoji: parsedReport.emoji,
       originalGoal: goal,
       currentGoal: goal,
     });
