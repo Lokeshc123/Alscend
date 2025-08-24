@@ -9,6 +9,7 @@ import Calendar from "../screens/Calendar/Calendar";
 import NewEntry from "../screens/New/NewEntry";
 import Analytics from "../screens/Analytics/Analytics";
 import Setting from "../screens/Settings/Setting";
+import TaskDetails from "../screens/Details/TaskDetails";
 const Tab = createBottomTabNavigator();
 const BottomTabNavigator = () => {
   return (
@@ -73,7 +74,10 @@ const BottomTabNavigator = () => {
           ),
         }}
       />
+     
+
     </Tab.Navigator>
+    
   );
 };
 

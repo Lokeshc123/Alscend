@@ -4,12 +4,14 @@ import Login from "../screens/Auth/Login";
 import Register from "../screens/Auth/Register";
 import Home from "../screens/Home/Home";
 import BottomTabNavigator from "./BottomTabNavigator";
+import TaskDetails from "../screens/Details/TaskDetails";
 
 // Define the type for the stack navigator
 export type RootStackParamList = {
   Login: undefined;
   Register: undefined;
   BottomTab: undefined;
+  TaskDetails: { taskId: string };
 };
 
 // Create the stack navigator with the correct type
@@ -27,6 +29,7 @@ const StackNavigator = () => {
         <Stack.Screen name="Login" component={Login} />
         <Stack.Screen name="Register" component={Register} />
         <Stack.Screen name="BottomTab" component={BottomTabNavigator} />
+        <Stack.Screen name="TaskDetails" component={TaskDetails} />
       </Stack.Navigator>
     </NavigationContainer>
   );

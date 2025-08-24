@@ -43,7 +43,7 @@ ${categories.map((cat) => cat.name).join(", ")}
     Return a JSON object in this format:
     {
       "category": "chosen_category",
-      "emoji": "Professional looking but modern vibes emoji_representation",
+      "emoji": "A professional-looking but modern-vibe emoji specifically inspired by the title '${title}'",
       "color": "color_code"
     }`;
 
@@ -96,7 +96,7 @@ export const getUserTasks = async (
       throw { status: 401, message: "Unauthorized" };
     }
     const userId = req.user._id;
-    const tasks = await Task.find({ user: userId });
+    const tasks = await Task.find({ user: userId }).select("-__v -user");
     res.status(200).json({ status: "success", data: tasks });
   } catch (error) {
     next(error);
