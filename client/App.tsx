@@ -4,14 +4,15 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import StackNavigator from "./src/navigation/StackNavigator";
 import * as NavigationBar from "expo-navigation-bar";
 import { useEffect } from "react";
-export default function App() {
-  useEffect(() => {
-    NavigationBar.setVisibilityAsync("hidden");
 
-    NavigationBar.setBehaviorAsync("overlay-swipe");
-  }, []);
+export default function App() {
+useEffect(() => {
+  NavigationBar.setVisibilityAsync("hidden");
+
+}, []);
+
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container} >
       <StackNavigator />
       <StatusBar style="auto" />
     </SafeAreaView>
@@ -21,5 +22,6 @@ export default function App() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: "#fff",
   },
 });

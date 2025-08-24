@@ -7,6 +7,7 @@ import {
   Recommendation,
   RecommendedTask,
 } from "../utils/customInterface";
+import { ca } from "date-fns/locale";
 
 export const generateTaskRecommendations = async (
   req: AuthRequest,
@@ -150,6 +151,8 @@ export const recommendNewTasks = async (
 ) => {
   try {
     const userId = req.user?._id;
+    const {mode , requestCategory} = req.params;
+    
     if (!userId) throw { status: 401, message: "Unauthorized" };
 
     // Fetch existing tasks for the user
@@ -267,6 +270,72 @@ export const recommendNewTasks = async (
       status: "success",
       message: "New task recommendations generated successfully",
       data: recommendations,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+
+
+export const recommendNewCategories = async (
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const userId = req.user?._id;
+    if (!userId) {
+      throw { status: 401, message: "Unauthorized" };
+    }
+
+    // Get user's current task categories
+    const tasks = await Task.find({ user: userId }).select("category");
+    const existingCategories = tasks.map((t) => t.category);
+
+    // AI prompt
+    const prompt = `
+You are an AI assistant for a self-improvement app. The user currently has tasks in the following categories: 
+${existingCategories.join(", ")}
+
+**Instructions:**
+1. Recommend exactly 5 NEW categories that are NOT in the existing list.
+2. Categories can be fun, exploratory, unusual, or creative but still helpful for self-improvement.
+3. For each category, provide:
+   - "category": string
+4. Return ONLY a JSON array of 5 objects. No extra text.
+`;
+
+  
+    // Get AI response
+    const aiResult = await aiResponse(prompt);
+    const jsonMatch = aiResult.match(/\[[\s\S]*\]/);
+    if (!jsonMatch)
+      throw { status: 500, message: "AI returned invalid format" };
+
+    let newCategories;
+    try {
+      newCategories = JSON.parse(jsonMatch[0]);
+    } catch {
+      throw { status: 500, message: "AI response parsing failed" };
+    }
+
+    // Validate response
+    if (!Array.isArray(newCategories) || newCategories.length !== 5) {
+      throw { status: 500, message: "AI did not return exactly 5 categories" };
+    }
+
+    // Ensure each category has required fields
+    newCategories.forEach((cat) => {
+      if (!cat.category) {
+        throw { status: 500, message: "AI returned invalid category structure" };
+      }
+    });
+
+    res.status(200).json({
+      status: "success",
+      message: "New category recommendations generated successfully",
+      data: newCategories,
     });
   } catch (error) {
     next(error);

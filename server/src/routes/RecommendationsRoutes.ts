@@ -2,6 +2,7 @@ import express from "express";
 import { protect } from "../middlewares/verifyUser";
 import {
   generateTaskRecommendations,
+  recommendNewCategories,
   recommendNewTasks,
 } from "../controllers/RecommendationController";
 // import { getRecommendation } from "../controllers/RecommendationController";
@@ -15,5 +16,7 @@ router.get(
 );
 
 router.get("/newTasks", protect as express.RequestHandler, recommendNewTasks);
+router.get("/newCategories", protect as express.RequestHandler, recommendNewCategories);
+
 
 export default router;
