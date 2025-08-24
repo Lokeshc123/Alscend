@@ -4,34 +4,31 @@ import { getToken } from "../../services/secureStorage";
 import { getRecommendedTasks } from "../../services/task";
 import { LinearGradient } from "expo-linear-gradient";
 import { MaterialIcons, Ionicons } from "@expo/vector-icons";
+import { useNavigation } from "@react-navigation/native";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { RootStackParamList } from "../../navigation/StackNavigator";
 
+type TaskAddingScreenProps = NativeStackNavigationProp<
+  RootStackParamList,
+  "RecoHabits"
+>;
 const NewEntry = () => {
-  const getTaskRecommendations = async (mode?: string) => {
-    console.log(`Fetching task recommendations... [Mode: ${mode}]`);
-    const token = await getToken();
-    if (token) {
-      try {
-        const recommendations = await getRecommendedTasks(token);
-        console.log(recommendations);
-      } catch (error) {
-        console.error(error);
-      }
-    }
-  };
+  const navigation = useNavigation<TaskAddingScreenProps>();
+
 
   return (
     <View style={styles.container}>
       {/* Title Section */}
       <View style={styles.header}>
-        <Text style={styles.title}>🚀 Let’s build your next habit!</Text>
+        <Text style={styles.title}>Forge Your Next Habit</Text>
         <Text style={styles.subtitle}>
-          Choose how you’d like to create your next task
+          Select a smart way to craft your next goal
         </Text>
       </View>
 
       {/* Surprise Me */}
       <TouchableOpacity
-        onPress={() => getTaskRecommendations("surprise")}
+        onPress={() => navigation.navigate("RecoHabits")}
         style={styles.cardWrapper}
       >
         <LinearGradient
@@ -41,7 +38,7 @@ const NewEntry = () => {
           end={{ x: 1, y: 1 }}
         >
           <Ionicons name="sparkles" size={28} color="#fff" />
-          <Text style={styles.optionText}>Surprise Me</Text>
+          <Text style={styles.optionText}>Discover AI-Powered Habits</Text>
         </LinearGradient>
       </TouchableOpacity>
 
@@ -57,7 +54,7 @@ const NewEntry = () => {
           end={{ x: 1, y: 1 }}
         >
           <MaterialIcons name="category" size={28} color="#fff" />
-          <Text style={styles.optionText}>Choose a Category</Text>
+          <Text style={styles.optionText}>Explore Habits by Category</Text>
         </LinearGradient>
       </TouchableOpacity>
 
@@ -73,7 +70,7 @@ const NewEntry = () => {
           end={{ x: 1, y: 1 }}
         >
           <Ionicons name="create-outline" size={28} color="#fff" />
-          <Text style={styles.optionText}>Add Manually</Text>
+          <Text style={styles.optionText}>Add Habit Manually</Text>
         </LinearGradient>
       </TouchableOpacity>
     </View>

@@ -7,8 +7,11 @@ import { useEffect } from "react";
 
 export default function App() {
 useEffect(() => {
-  NavigationBar.setVisibilityAsync("hidden");
+  if (NavigationBar && NavigationBar.setVisibilityAsync) {
+    NavigationBar.setVisibilityAsync("hidden");
+    
 
+  }
 }, []);
 
   return (

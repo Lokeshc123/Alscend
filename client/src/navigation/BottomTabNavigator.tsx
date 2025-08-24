@@ -7,6 +7,7 @@ import NewEntry from "../screens/New/NewEntry";
 import Analytics from "../screens/Analytics/Analytics";
 import Setting from "../screens/Settings/Setting";
 import { Entypo, MaterialCommunityIcons, Feather, AntDesign } from "@expo/vector-icons";
+import NewEntryStack from "./NewEntryStack";
 
 const Tab = createBottomTabNavigator();
 
@@ -54,7 +55,7 @@ const BottomTabNavigator = () => {
       {/* New Task (Floating Button) */}
       <Tab.Screen
         name="New"
-        component={NewEntry}
+        component={NewEntryStack}
         options={{
           tabBarIcon: ({ color }) => (
             <AntDesign name="plus" size={28} color="#fff" />
@@ -84,6 +85,9 @@ const BottomTabNavigator = () => {
           ),
         }}
       />
+
+
+      
     </Tab.Navigator>
   );
 };
